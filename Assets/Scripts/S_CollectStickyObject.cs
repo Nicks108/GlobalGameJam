@@ -2,9 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.Events;
+using Random = UnityEngine.Random;
+
+
+
+
+
 [RequireComponent(typeof(S_VolumeObject))]
 public class S_CollectStickyObject : MonoBehaviour
 {
@@ -17,14 +24,32 @@ public class S_CollectStickyObject : MonoBehaviour
 
     };
 
-    [SerializeField] UnityEvent uiEvent;
-
+    [SerializeField] UnityEvent EventPlayerCOllideWithStickyObject, flowerScore;
+    
     public float VolumeBias = 3;
 
-    
+    public List<AudioClip> CollectSplatClips = new List<AudioClip>();
+    public List<AudioClip> powerUpAudioClips = new List<AudioClip>();
+    public AudioSource ItemCollectionAudioSource;
+    //public AudioSource powerUpAudioSource;
+
+
+    public float BounceForce = 5;
+
     private MeshCollider meshCollider;
     private Mesh OriginalCollisionMesh;
+	public BlastVegetables vegetableBlaster;
 
+    private static UnityEngine.Object LoadResorce(string file)
+    {
+        var Resorce = Resources.Load(file);
+        if (Resorce == null)
+        {
+            throw new FileNotFoundException("...no file found - please check the configuration");
+        }
+
+        return Resorce;
+    }
 
     private void Start()
     {
@@ -33,6 +58,24 @@ public class S_CollectStickyObject : MonoBehaviour
         ;
         meshCollider.sharedMesh = DuplicateMesh(meshCollider.sharedMesh);
         OriginalCollisionMesh = meshCollider.sharedMesh;
+
+
+
+
+
+
+
+        if (!HitParticals)
+            HitParticals = LoadResorce("Hit_02") as GameObject;
+
+        if (hitAudioClips.Count <= 0)
+        {
+            hitAudioClips.Add(LoadResorce("Audio/Sound Effects/boing1") as AudioClip);
+            hitAudioClips.Add(LoadResorce("Audio/Sound Effects/boing2") as AudioClip);
+
+        }
+
+
     }
 
     private Mesh DuplicateMesh(Mesh incommingMesh)
@@ -50,27 +93,50 @@ public class S_CollectStickyObject : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+
+        if (collision.gameObject.tag == "Untagged")
+        {
+
+            HitAnimation(collision);
+            return;
+        }
+
         if (collision.gameObject.tag == "StickyObject")
         {
+            
+            
+
             if (collision.gameObject.GetComponent<Plant>() != null)
             {
                 collision.gameObject.SetActive(false);
                 // increase score and stuff
-                return;
+                EventPlayerCOllideWithStickyObject.Invoke();
+                flowerScore.Invoke();
+                //vegetableBlaster.PopulateVegetableArray(collision.gameObject);
+                ItemCollectionAudioSource.clip = powerUpAudioClips[Random.Range(0, powerUpAudioClips.Count)];
+                ItemCollectionAudioSource.Play();
+
             }
-            uiEvent.Invoke();
-            if (collision.gameObject.GetComponent<S_VolumeObject>().Volume* VolumeBias < 
-                GetComponent<S_VolumeObject>().Volume)
+            else if (collision.gameObject.GetComponent<S_VolumeObject>().Volume* VolumeBias < 
+                      GetComponent<S_VolumeObject>().Volume)
             {
+               
+
+                ItemCollectionAudioSource.clip = CollectSplatClips[Random.Range(0, CollectSplatClips.Count)];
+                ItemCollectionAudioSource.Play();
+
+                EventPlayerCOllideWithStickyObject.Invoke();
+                vegetableBlaster.PopulateVegetableArray(collision.gameObject);
                 GetComponent<S_VolumeObject>().Volume += collision.gameObject.GetComponent<S_VolumeObject>().Volume;
+                vegetableBlaster.vegetableScoreValues.Add(GetComponent<S_VolumeObject>().Volume*10);
                 collision.transform.parent = transform;
 
                 Destroy(collision.gameObject.GetComponent<Rigidbody>());
                 collision.gameObject.GetComponent<MeshCollider>().enabled = false;
 
 
-                InflateAllVerts();
-                DistortMesh(collision.gameObject, DistortType.DISTORT_GROUP_TO_ORIGIN);
+                //InflateAllVerts();
+                //DistortMesh(collision.gameObject, DistortType.DISTORT_GROUP_TO_ORIGIN);
                 
                 
                 //SphereCollider sphereCollider = GetComponent<SphereCollider>();
@@ -78,9 +144,40 @@ public class S_CollectStickyObject : MonoBehaviour
                 //sphereCollider.radius= CalculateCombinedBounds().size.magnitude/5;
 
             }
+            else //collectable has too much volume
+            {
+                Rigidbody rb = GetComponent<Rigidbody>();
+                rb.velocity = new Vector3(-collision.relativeVelocity.x*BounceForce, collision.relativeVelocity.y, -collision.relativeVelocity.z* BounceForce);
+                
+                S_StickyObjet stickyObject = collision.gameObject.GetComponent<S_StickyObjet>();
+                stickyObject.HitAnimation(collision);
+            }
 
         }
     }
+
+
+    public GameObject HitParticals;
+    public List<AudioClip> hitAudioClips = new List<AudioClip>();
+    public AudioSource HitAudioSource;
+
+    public void HitAnimation(Collision collision)
+    {
+        //play hit particals
+        GameObject newHitParticals = Instantiate(HitParticals);
+        newHitParticals.GetComponent<ParticleSystem>().Play();
+
+        Vector3 HitPoint = collision.GetContact(0).point;
+
+        newHitParticals.transform.position = HitPoint;
+
+        HitAudioSource.clip = hitAudioClips[Random.Range(0, hitAudioClips.Count)];
+        HitAudioSource.Play();
+
+
+    }
+ 
+
 
     const float Volumedampening = 0.01f;
     void InflateAllVerts () 

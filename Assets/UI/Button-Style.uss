@@ -1,0 +1,18 @@
+.Button-Style:hover {
+    background-image: url('project://database/Assets/UI/Assets/Buttons/Red/buttons_07.png?fileID=2800000&guid=9829de31db000a04a9aaa58800edd7a9&type=3#buttons_07');
+    -unity-background-image-tint-color: rgba(221, 221, 221, 255);
+    background-color: rgba(255, 255, 255, 255);
+}
+
+.Button-Style {
+    background-image: url('project://database/Assets/UI/Assets/Buttons/Red/buttons_07.png?fileID=2800000&guid=9829de31db000a04a9aaa58800edd7a9&type=3#buttons_07');
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.Button-Style:active {
+    background-image: url('project://database/Assets/UI/Assets/Buttons/Red/buttons_03.png?fileID=2800000&guid=3c3f48169c1262e4f9d5a397bd43e0a8&type=3#buttons_03');
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-color: rgb(255, 255, 255);
+}

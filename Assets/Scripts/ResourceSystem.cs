@@ -97,14 +97,7 @@ public class ResourceSystem : MonoBehaviour
 
     bool CheckThreat()
     {
-        if(forestPercentage % 20 == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (forestPercentage % 20 == 0);
     }
 
     void UnleashThreat()
@@ -113,15 +106,15 @@ public class ResourceSystem : MonoBehaviour
         // reduce profits
         // calculate amount of land lost/saved:
         float destructionValue = Mathf.Abs(forestPercentage - 100);
-        float tempProfit = QuickPercentCalc(ref profit, ref destructionValue);
+        float tempProfit = QuickPercentCalc( profit, destructionValue);
         for (int i = 0; i < totalFunded.Length; i++)
         {
-            float tempVal = QuickPercentCalc(ref totalFunded[i], ref destructionValue);
+            float tempVal = QuickPercentCalc(totalFunded[i], destructionValue);
             totalFunded[i] = totalFunded[i] - tempVal;
         }
     }
 
-    float QuickPercentCalc(ref float target, ref float percentage)
+    float QuickPercentCalc(in float target, in float percentage)
     {
         return (target / 100) * percentage;
     }
@@ -136,7 +129,9 @@ public class ResourceSystem : MonoBehaviour
     {
         CheckAction();
         CheckMovement();
-        if(CheckThreat()) { UnleashThreat(); }
+        if(CheckThreat())
+            UnleashThreat(); 
+
         UpdateTemperature();
     }
 }

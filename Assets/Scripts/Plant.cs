@@ -6,8 +6,11 @@ public class Plant : MonoBehaviour
 {
     Color[] randomColours = new Color[9] {Color.white,Color.black,Color.gray,
     Color.red,Color.green,Color.blue,Color.yellow,Color.magenta,Color.cyan};
-    WaitForSeconds waitTime = new WaitForSeconds(1.0f);
-    WaitForSeconds stopParticles = new WaitForSeconds(5.0f);
+
+    private const float waitSeconds = 1.0f;
+    private const float StopSeconds = 5.0f;
+    WaitForSeconds waitTime = new WaitForSeconds(waitSeconds);
+    WaitForSeconds stopParticles = new WaitForSeconds(StopSeconds);
     ParticleSystem plantParticles;
     Vector3 veryFarAway = new Vector3(9999,9999,9999);
     // Start is called before the first frame update
@@ -29,11 +32,18 @@ public class Plant : MonoBehaviour
         }
         RandomiseColour();
         StartCoroutine(OverrideVolume());
+        StartCoroutine(DisappearOverTime());
     }
 
     void OnDisable()
     {
         transform.position = veryFarAway;
+    }
+
+    IEnumerator DisappearOverTime()
+    {
+        yield return new WaitForSeconds(5.0f);
+        gameObject.SetActive(false);
     }
 
     IEnumerator OverrideVolume()

@@ -1,35 +1,56 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
+
+
+[System.Serializable]
+
 public class RootSpawnEngine : MonoBehaviour
 {
     public float barValue; // increase as you grab stuff
-    public static RootSpawnEngine sharedInstance;
+
     public List<GameObject> pooledObjects;
     public GameObject objectToPool;
     public int amountToPool;
 
-    float spawnTick, runtimeVal;
-    bool beginSpawning;
+    public float spawnDelay;
+
+    public float SpawnRadius = 3f;
+
+    WaitForSeconds coroutineTimer = new WaitForSeconds(0.02f);
+    public UIManager managerRef;
+
+
+
     private void Awake()
     {
-        sharedInstance = this;
+        
     }
 
     // Start is called before the first frame update
     void Start()
     {
         pooledObjects = new List<GameObject>();
-        GameObject tmp;
+        PopulatePool();
+
+
+        //InvokeRepeating("SpawnObjects", 5, spawnDelay);
+
+        GameObject.Find("UI MANAGER").GetComponent<UIManager>().spawnEvent.AddListener( MassSpawnPlants);
+
+    }
+
+    private void PopulatePool()
+    {
         for (int i = 0; i < amountToPool; i++)
         {
-            tmp = Instantiate(objectToPool);
+            GameObject tmp = Instantiate(objectToPool);
             tmp.SetActive(false);
+            tmp.name += i;
             pooledObjects.Add(tmp);
         }
-        runtimeVal = 0.05f;
-        beginSpawning = false;
     }
 
     public GameObject GetPooledObject()
@@ -44,47 +65,55 @@ public class RootSpawnEngine : MonoBehaviour
         return null;
     }
 
-    public void SpawnObjects()
+    public bool SpawnObjects()
     {
-        Vector3 spawnBox = GOReferences.GOReferencesInstance.go_player.transform.localScale;
-        Vector3 position = new Vector3(Random.Range(0.8f,1.0f) * spawnBox.x, Random.Range(0.8f, 1.0f) * spawnBox.y, Random.Range(0.8f, 1.0f) * spawnBox.z);
-        position = GOReferences.GOReferencesInstance.go_player.transform.TransformPoint(position - spawnBox / 2);
         GameObject plant = GetPooledObject();
         if (plant != null)
         {
-            plant.transform.position = position;
-            plant.transform.rotation = GOReferences.GOReferencesInstance.go_player.transform.rotation;
+            Vector3 tempVector = RandomPointAroundTransform(transform, SpawnRadius);
+            tempVector.y = tempVector.y + 2;
+            plant.transform.position = tempVector;
+            plant.transform.rotation = transform.rotation;
             plant.SetActive(true);
+            return true;
         }
         else
         {
-            beginSpawning = false;
+            return false;
         }
     }
 
-    public void BeginSpawning()
+    public void MassSpawnPlants()
     {
-        beginSpawning = true;
+        for (int i = 0; i < 10; i++)
+        {
+            SpawnObjects();
+        }
+        //StartCoroutine(PlantSpawner());
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator PlantSpawner()
     {
-        if (Keyboard.current.pKey.wasPressedThisFrame)
+        while(SpawnObjects())
         {
-            beginSpawning = true;
+            yield return coroutineTimer;
         }
-        if (Keyboard.current.kKey.wasPressedThisFrame)
-        {
-            beginSpawning = false;
-        }
-        if (beginSpawning)
-        {
-            if(Time.time > spawnTick)
-            {
-                spawnTick = Time.time + runtimeVal;
-                SpawnObjects();
-            }
-        }
+    }
+
+    private Vector3 RandomPointAroundTransform(Transform Origin, float radius)
+    {
+        Vector3 randomPos = Random.insideUnitSphere * radius;
+        //randomPos += transform.position;
+        randomPos.y = 1f;
+
+        Vector3 direction = randomPos; // - transform.position;
+        direction.Normalize();
+
+        float dotProduct = Vector3.Dot(Origin.forward, direction);
+        float dotProductAngle = Mathf.Acos(dotProduct / Origin.forward.magnitude * direction.magnitude);
+
+        randomPos.x = Mathf.Cos(dotProductAngle) * radius + Origin.position.x;
+        randomPos.z = Mathf.Sin(dotProductAngle * (Random.value > 0.5f ? 1f : -1f)) * radius + Origin.position.z;
+        return randomPos;
     }
 }

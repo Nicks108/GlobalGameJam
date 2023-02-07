@@ -1,0 +1,12 @@
+﻿using UnityEditor;
+using UnityEngine;
+
+[CustomEditor(typeof($MonoBehaviour$))]
+public class $MonoBehaviour$InspectorGui : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        $MonoBehaviour$ myTarget = ($MonoBehaviour$)target;
+//$InspectorControles$
+    }
+}

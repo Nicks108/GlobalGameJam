@@ -1,0 +1,16 @@
+﻿using UnityEngine;
+using UnityEditor;
+
+public class $BasicMenuItemTemplate$ : EditorWindow
+{
+    [MenuItem("Tools/NTTools/$MenuPath$")]
+    private static void Init()
+    {
+        $BasicMenuItemTemplate$ window = ($BasicMenuItemTemplate$) EditorWindow.GetWindow(typeof($BasicMenuItemTemplate$));
+        window.Show();
+    }
+
+    private void OnGUI()
+    {
+    }
+}

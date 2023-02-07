@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Button-Style.uss?fileID=7433441132597879392&amp;guid=16a8ce861fc245b4a825724e36bbb243&amp;type=3#Button-Style" />
+    <ui:VisualElement name="BackGround" style="flex-grow: 1; align-items: center; justify-content: center; cursor: url(&apos;project://database/Assets/UI/Assets/Cursors/cursor1.png?fileID=2800000&amp;guid=18cc904c69016c64a86a82bfbac5a0df&amp;type=3#cursor1&apos;);">
+        <ui:VisualElement style="height: 349px; width: 388px; background-color: rgba(87, 87, 87, 0.67); align-items: center; justify-content: center; cursor: url(&apos;project://database/Assets/UI/Assets/Cursors/cursor1.png?fileID=2800000&amp;guid=18cc904c69016c64a86a82bfbac5a0df&amp;type=3#cursor1&apos;);">
+            <ui:Button tabindex="-1" text="Start" display-tooltip-when-elided="true" name="btnStart" class="Button-Style" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
